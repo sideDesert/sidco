@@ -1,4 +1,4 @@
-use crossterm::cursor::{MoveTo, Hide, Show};
+use crossterm::cursor::{Hide, MoveTo, MoveToNextLine, Show};
 use crossterm::terminal::{enable_raw_mode, disable_raw_mode, Clear, size};
 use crossterm::{queue, Command};
 use crossterm::style::Print;
@@ -102,6 +102,10 @@ impl Terminal {
         Self::queue_command(MoveTo(*x,*y)).unwrap();
         Ok(())
     }
+    pub fn move_to_next_line() -> Result<(), Error>{
+        Self::queue_command(MoveToNextLine(1)).unwrap();
+        Ok(())
+    }
 
     pub fn clear_screen() -> Result<(), Error> {
         Self::queue_command( Clear(crossterm::terminal::ClearType::All)).unwrap();
@@ -129,7 +133,7 @@ impl Terminal {
         Ok(())
     }
     pub fn print(string: &str) -> Result<(), Error> {
-        Self::queue_command( Print(string))?;
+        Self::queue_command(Print(string))?;
         Self::execute()?;
         
         Ok(())

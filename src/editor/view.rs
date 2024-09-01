@@ -1,3 +1,4 @@
+
 use crate::terminal::{Terminal, Coords, Size};
 use crate::editor::buffer::Buffer;
 
@@ -18,21 +19,42 @@ impl View {
             Terminal::execute()?;
             return Ok(())
         } 
-        
         let size: Size = Terminal::get_size()?;
         let height = size.height;
         for row_num in 0..height {
-            Terminal::move_to(&Coords{x:0, y: row_num})?;
             Terminal::clear_line()?;
-            if let Some(line_content) = self.buffer.content.get(row_num as usize) {
-                Terminal::print(line_content)?;
+            if let Some(row_content) = self.buffer.content.get(row_num as usize) {
+                self.print_row_content(row_content);
             }
+            Terminal::move_to_next_line()?;
         }    
         Terminal::execute()?;
         Ok(())
-
     }
 
+    fn print_row_content(&self, row_content: &str){
+        let size = Terminal::get_size().unwrap();
+        let width = size.width as usize;
+        let mut lptr = 0;
+        let mut rptr = width;
+        
+        if row_content.len() < width {
+            Terminal::clear_line().unwrap();
+            Terminal::print(row_content).unwrap();
+            return;
+        }
+        while rptr < width {
+            Terminal::clear_line().unwrap();
+            Terminal::print(&row_content[lptr..rptr]).unwrap();
+            Terminal::move_to_next_line().unwrap();
+            lptr = rptr;
+            rptr += width;
+        }
+        if lptr < width {
+            Terminal::clear_line().unwrap();
+            Terminal::print(&row_content[lptr..]).unwrap();
+        }
+    }
     fn draw_rows(&self) -> Result<(), std::io::Error>{
         Terminal::move_to(&Coords{x: 0, y: 0})?;
         let Size{height,..} = Terminal::get_size()?;
